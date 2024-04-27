@@ -392,6 +392,7 @@ exports.update_user_detail = async (req, res) => {
         message: "User detail updated successfully",
       });
     }
+    return res.status(200).send({status:false,data:{},message:"No data updated"})
   } catch (err) {
     return res.status(500).send({
       status: false,
