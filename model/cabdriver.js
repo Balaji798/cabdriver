@@ -4,11 +4,11 @@ const cabdriverSchema = new mongoose.Schema(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    dob: { type: Date, required: true },
+    email: { type: String },
+    dob: { type: Date },
     mobileNumber: { type: String, required: true, unique: true },
-    address: { type: String, required: true },
-    pincode: { type: String, required: true },
+    address: { type: String },
+    pincode: { type: String },
     bank_account_detail:{
         account_type:{
             type:String,

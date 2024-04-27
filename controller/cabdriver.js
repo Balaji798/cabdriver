@@ -96,9 +96,17 @@ exports.send_otp_to_aadhaar = async (req, res) => {
       }
     );
     const data = response.data;
-    res.status(200).send({status:true,data,message:"OTP send successfully"});
+    res
+      .status(200)
+      .send({
+        status: response.data.data.valid_aadhaar ? true : false,
+        data,
+        message: response.data.data.valid_aadhaar
+          ? "OTP send successfully"
+          : "Invalid aadhaar number",
+      });
   } catch (err) {
-    console.log(err.message)
+    console.log(err.message);
     return res.status(500).send({
       status: false,
       data: { errorMessage: err.message },
@@ -110,23 +118,31 @@ exports.send_otp_to_aadhaar = async (req, res) => {
 exports.verify_aadhaar = async (req, res) => {
   try {
     const { otp } = req.body;
-    const { client_id } = req.body; 
+    const { client_id } = req.body;
     const response = await axios.post(
-      'https://api.idcentral.io/idc/v2/aadhaar/okyc/submit-otp',
+      "https://api.idcentral.io/idc/v2/aadhaar/okyc/submit-otp",
       { otp, client_id }, // Include client_id in the request body
       {
         headers: {
-          'accept': 'application/json',
-          'api-key': process.env.AADHAAR_API_KEY, // Replace 'YOUR_API_KEY' with your actual API key
-          'Content-Type': 'application/json'
-        }
+          accept: "application/json",
+          "api-key": process.env.AADHAAR_API_KEY, // Replace 'YOUR_API_KEY' with your actual API key
+          "Content-Type": "application/json",
+        },
       }
     );
     const data = response.data;
-    if (data.status === 'success') {
-      res.status(200).json({ status:true,data,message: 'Verification successful' });
+    if (data.status === "success") {
+      await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        { aadhaar_number: req.body.aadhaar_number }
+      );
+      res
+        .status(200)
+        .json({ status: true, data, message: "Verification successful" });
     } else {
-      res.status(400).json({ status:false,data,message: 'Verification failed' });
+      res
+        .status(400)
+        .json({ status: false, data, message: "Verification failed" });
     }
   } catch (err) {
     return res.status(500).send({
