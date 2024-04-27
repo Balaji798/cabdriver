@@ -190,7 +190,7 @@ exports.validate_pan = async (req, res) => {
     } else {
       return res
         .status(200)
-        .send({ status: false, data: {}, message: "Invalid PAN Number" });
+        .send({ status: false, data: {}, message: "Invalid PAN Detail" });
     }
   } catch (err) {
     console.log(err.message);
