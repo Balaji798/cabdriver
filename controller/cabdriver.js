@@ -131,7 +131,6 @@ exports.verify_aadhaar = async (req, res) => {
         },
       }
     );
-    console.log(response)
     if (response?.data?.data !==null && response?.data?.status === "success") {
       await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
@@ -149,7 +148,7 @@ exports.verify_aadhaar = async (req, res) => {
     return res.status(500).send({
       status: false,
       data: { errorMessage: err.message },
-      message: "server error",
+      message: "Invalid OTP",
     });
   }
 };
