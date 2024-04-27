@@ -177,7 +177,7 @@ exports.validate_pan = async (req, res) => {
       }
     );
     console.log(response)
-    if (response.data.error === null) {
+    if (response.data.error !== null) {
       await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         { pane_card_number: req.body.pan_number }
