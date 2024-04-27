@@ -52,7 +52,18 @@ const cabdriverSchema = new mongoose.Schema(
         pending_e_challans:{
             type:String
         }
-    }
+    },
+    ratingFeedback:{
+        type:String
+    },
+    driving_hour_limitation: {
+        limitations: {
+            type:String
+        },
+        total_work_hour:{
+            type:String
+        }
+    },
   },
   { timestamps: true }
 );

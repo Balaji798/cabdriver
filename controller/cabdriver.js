@@ -85,8 +85,10 @@ exports.user_login = async (req, res) => {
 exports.send_otp_to_aadhaar = async (req, res) => {
   try {
     const { aadhaar_number } = req.body;
-    if(aadhaar_number.length !== 12){
-      return res.status(200).status({status:false,data:{},message:"Invalid aadhaar number"})
+    if (aadhaar_number.length !== 12) {
+      return res
+        .status(200)
+        .status({ status: false, data: {}, message: "Invalid aadhaar number" });
     }
     const response = await axios.post(
       "https://api.idcentral.io/idc/v2/aadhaar/okyc/generate-otp",
@@ -122,7 +124,7 @@ exports.verify_aadhaar = async (req, res) => {
     const { client_id } = req.body;
     const response = await axios.post(
       "https://api.idcentral.io/idc/v2/aadhaar/okyc/submit-otp",
-      { otp:Number(otp), client_id }, // Include client_id in the request body
+      { otp: Number(otp), client_id }, // Include client_id in the request body
       {
         headers: {
           accept: "application/json",
@@ -131,18 +133,18 @@ exports.verify_aadhaar = async (req, res) => {
         },
       }
     );
-    if (response?.data?.data !==null && response?.data?.status === "success") {
+    if (response?.data?.data !== null && response?.data?.status === "success") {
       await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         { aadhaar_number: Number(req.body.aadhaar_number) }
       );
       res
         .status(200)
-        .json({ status: true, data:{}, message: "Verification successful" });
+        .json({ status: true, data: {}, message: "Verification successful" });
     } else {
       res
         .status(400)
-        .json({ status: false, data:{}, message: response.data.message });
+        .json({ status: false, data: {}, message: response.data.message });
     }
   } catch (err) {
     return res.status(500).send({
@@ -176,7 +178,7 @@ exports.validate_pan = async (req, res) => {
         },
       }
     );
-    console.log(response)
+    console.log(response);
     if (response.data.error === null) {
       await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
@@ -185,7 +187,10 @@ exports.validate_pan = async (req, res) => {
       return res.status(200).send({
         status: true,
         data: response.data,
-        message: response.data.error!== null? response.data.error:"Pan Card validation successful",
+        message:
+          response.data.error !== null
+            ? response.data.error
+            : "Pan Card validation successful",
       });
     } else {
       return res
@@ -277,20 +282,104 @@ exports.add_bank_detail = async (req, res) => {
 
 exports.update_user_detail = async (req, res) => {
   try {
-    const data = await cabdriverModel.findOneAndUpdate(
-      { _id: req.user },
-      {
-        fullName: req.body.fullName?req.body.fullName:"",
-        email: req.body.email,
-        mobileNumber: req.body.mobileNumber,
-        pincode: req.body.pincode,
-      }
-    );
-    return res.status(200).send({
-      status: true,
-      data,
-      message: "User detail updated successfully",
-    });
+    if ((req.body.limitations && req.body.total_work_hour)) {
+      const data = await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        {
+          driving_hour_limitation: {
+            limitations: req.body.limitations,
+            total_work_hour: req.body.total_work_hour,
+          },
+        }
+      );
+      return res.status(200).send({
+        status: true,
+        data,
+        message: "User detail updated successfully",
+      });
+    }
+    if (req.body.ratingFeedback) {
+      const data = await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        {
+          ratingFeedback: req.body.ratingFeedback,
+        }
+      );
+      return res.status(200).send({
+        status: true,
+        data,
+        message: "User detail updated successfully",
+      });
+    }
+    if (
+      req.body.firstName &&
+      req.body.lastName &&
+      req.body.total_experience &&
+      req.body.email &&
+      req.body.mobileNumber &&
+      req.body.pincode &&
+      req.body.dob && 
+      req.body.vehicle_type
+    ) {
+      const data = await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        {
+          firstName: req.body.fullName,
+          lastName: req.body.lastName,
+          email: req.body.email,
+          mobileNumber: req.body.mobileNumber,
+          pincode: req.body.pincode,
+          dob: req.body.dob,
+          address: req.body.address,
+          driving_experience: {
+            total_experience: req.body.total_experience,
+            vehicle_type: req.body.vehicle_type,
+          },
+        }
+      );
+      return res.status(200).send({
+        status: true,
+        data,
+        message: "User detail updated successfully",
+      });
+    }
+    if (
+      req.body.vehicle_registration &&
+      req.body.permit_details &&
+      req.body.pending_e_challans
+    ) {
+      const data = await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        {
+          vehicle: {
+            vehicle_registration: req.body.vehicle_registration,
+            permit_details: req.body.permit_details,
+            pending_e_challans: req.body.pending_e_challans,
+          },
+        }
+      );
+      return res.status(200).send({
+        status: true,
+        data,
+        message: "User detail updated successfully",
+      });
+    }
+    if (req.body.fullName && req.body.email && req.body.mobileNumber && req.body.pincode) {
+      const data = await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        {
+          fullName: req.body.fullName,
+          email: req.body.email,
+          mobileNumber: req.body.mobileNumber,
+          pincode: req.body.pincode,
+        }
+      );
+      return res.status(200).send({
+        status: true,
+        data,
+        message: "User detail updated successfully",
+      });
+    }
   } catch (err) {
     return res.status(500).send({
       status: false,
