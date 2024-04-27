@@ -95,6 +95,7 @@ exports.send_otp_to_aadhaar = async (req, res) => {
         },
       }
     );
+    console.log(response.data)
     const data = response.data;
     res.status(200).send({
       status: response.data.data.valid_aadhaar ? true : false,
