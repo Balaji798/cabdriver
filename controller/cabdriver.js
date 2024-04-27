@@ -176,7 +176,8 @@ exports.validate_pan = async (req, res) => {
         },
       }
     );
-    if (response.data.status_code === 200) {
+    console.log(response)
+    if (response.data.error === null) {
       await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         { pane_card_number: req.body.pan_number }
@@ -184,7 +185,7 @@ exports.validate_pan = async (req, res) => {
       return res.status(200).send({
         status: true,
         data: response.data,
-        message: "Pan Card updated",
+        message: response.data.error!== null? response.data.error:"Pan Card validation successful",
       });
     } else {
       return res
