@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 exports.user_signup = async (req, res) => {
   try {
     const { firstName, email, lastName, mobileNumber } = await req.body;
-    const reqUser = await userModel.findOne({
+    const reqUser = await cabdriverModel.findOne({
       mobileNumber: mobileNumber,
     });
     if (
