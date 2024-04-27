@@ -64,6 +64,9 @@ const cabdriverSchema = new mongoose.Schema(
             type:String
         }
     },
+    tracking_monitoring:{
+        type:String
+    }
   },
   { timestamps: true }
 );

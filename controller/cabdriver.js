@@ -233,7 +233,6 @@ exports.validate_driving_license = async (req, res) => {
         },
       }
     );
-    console.log(response.data);
     const data = await cabdriverModel.findOneAndUpdate(
       { _id: req.user },
       { driving_license: req.body.req.body.license_Number }
@@ -303,6 +302,19 @@ exports.update_user_detail = async (req, res) => {
         { _id: req.user },
         {
           ratingFeedback: req.body.ratingFeedback,
+        }
+      );
+      return res.status(200).send({
+        status: true,
+        data,
+        message: "User detail updated successfully",
+      });
+    }
+    if(req.body.tracking_monitoring){
+      const data = await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        {
+          tracking_monitoring: req.body.tracking_monitoring,
         }
       );
       return res.status(200).send({
