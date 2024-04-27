@@ -85,9 +85,12 @@ exports.user_login = async (req, res) => {
 exports.send_otp_to_aadhaar = async (req, res) => {
   try {
     const { aadhaar_number } = req.body;
+    if(aadhaar_number.length !== 12){
+      return res.status(200).status({status:false,data:{},message:"Invalid aadhaar number"})
+    }
     const response = await axios.post(
       "https://api.idcentral.io/idc/v2/aadhaar/okyc/generate-otp",
-      { aadhaar_number },
+      { aadhaar_number: Number(aadhaar_number) },
       {
         headers: {
           accept: "application/json",
@@ -128,7 +131,7 @@ exports.verify_aadhaar = async (req, res) => {
         },
       }
     );
-    const data = response.data;
+    console.log(response)
     if (response?.data?.data !==null && response?.data?.status === "success") {
       await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
@@ -136,7 +139,7 @@ exports.verify_aadhaar = async (req, res) => {
       );
       res
         .status(200)
-        .json({ status: true, data, message: "Verification successful" });
+        .json({ status: true, data:{}, message: "Verification successful" });
     } else {
       res
         .status(400)
@@ -277,7 +280,7 @@ exports.update_user_detail = async (req, res) => {
     const data = await cabdriverModel.findOneAndUpdate(
       { _id: req.user },
       {
-        fullName: req.body.fullName,
+        fullName: req.body.fullName?req.body.fullName:"",
         email: req.body.email,
         mobileNumber: req.body.mobileNumber,
         pincode: req.body.pincode,
