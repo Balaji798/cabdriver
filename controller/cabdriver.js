@@ -33,7 +33,7 @@ exports.user_signup = async (req, res) => {
       mobileNumber: req.body.mobileNumber,
     };
 
-    const generatedToken = jwt.sign(payload, process.env.JWT_SECRET_KEY);
+    const generatedToken = jwt.sign(payload, process.env.JWT_KEY);
     return res.status(200).send({
       status: true,
       data: { token: generatedToken, user: user },
@@ -66,7 +66,7 @@ exports.user_login = async (req, res) => {
         mobileNumber: req.body.mobileNumber,
       };
 
-      const generatedToken = jwt.sign(payload, process.env.JWT_SECRET_KEY);
+      const generatedToken = jwt.sign(payload, process.env.JWT_KEY);
       return res.status(200).send({
         status: true,
         data: { token: generatedToken, user: user },
@@ -96,15 +96,13 @@ exports.send_otp_to_aadhaar = async (req, res) => {
       }
     );
     const data = response.data;
-    res
-      .status(200)
-      .send({
-        status: response.data.data.valid_aadhaar ? true : false,
-        data,
-        message: response.data.data.valid_aadhaar
-          ? "OTP send successfully"
-          : "Invalid aadhaar number",
-      });
+    res.status(200).send({
+      status: response.data.data.valid_aadhaar ? true : false,
+      data,
+      message: response.data.data.valid_aadhaar
+        ? "OTP send successfully"
+        : "Invalid aadhaar number",
+    });
   } catch (err) {
     console.log(err.message);
     return res.status(500).send({
@@ -152,9 +150,146 @@ exports.verify_aadhaar = async (req, res) => {
     });
   }
 };
-exports.add_driver = async (req, res) => {
+
+exports.validate_pan = async (req, res) => {
   try {
-    const data = await cabdriverModel.create();
+    if (!/[A-Z]{5}[0-9]{4}[A-Z]{1}/.test(req.body.pan_number)) {
+      return res
+        .status(200)
+        .send({ status: false, data: {}, message: "Invalid PAN Number" });
+    }
+    const { pan_number, dob, full_name } = req.body;
+    const response = await axios.post(
+      "https://api.idcentral.io/idc/v2/pan/pan-verify",
+      {
+        id_number: pan_number,
+        dob,
+        full_name,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "api-key": process.env.AADHAAR_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (response.data.status_code === 200) {
+      await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        { pane_card_number: req.body.pan_number }
+      );
+      return res.status(200).send({
+        status: true,
+        data: response.data,
+        message: "Pan Card updated",
+      });
+    } else {
+      return res
+        .status(200)
+        .send({ status: false, data: {}, message: "Invalid PAN Number" });
+    }
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).send({
+      status: false,
+      data: { errorMessage: err.message },
+      message: "server error",
+    });
+  }
+};
+
+exports.validate_driving_license = async (req, res) => {
+  try {
+    if (
+      !/^(([A-Z]{2}[0-9]{2})( )|([A-Z]{2}-[0-9]{2}))((19|20)[0-9][0-9])[0-9]{7}$/.test(
+        req.body.license_Number
+      )
+    ) {
+      return res
+        .status(200)
+        .send({ status: false, data: {}, message: "Invalid driving license" });
+    }
+    const { license_number, dob } = req.body;
+    const response = await axios.post(
+      "https://api.idcentral.io/idc/driving-license",
+      {
+        id_number: license_number,
+        dob,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "api-key": process.env.AADHAAR_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(response.data);
+    const data = await cabdriverModel.findOneAndUpdate(
+      { _id: req.user },
+      { driving_license: req.body.req.body.license_Number }
+    );
+    return res
+      .status(200)
+      .send({ status: true, data: response.data, message: "Pan Card updated" });
+  } catch (err) {}
+};
+exports.add_bank_detail = async (req, res) => {
+  try {
+    if (!/^\d{9,18}$/.test(req.body.account_number)) {
+      return res
+        .status(200)
+        .send({ status: false, data: {}, message: "Invalid account number" });
+    }
+    if (!/^[A-Za-z]{4}\d{7}$/) {
+      return res
+        .status(200)
+        .send({ status: false, data: {}, message: "Invalid IFSC number" });
+    }
+    const data = await cabdriverModel.findOneAndUpdate(
+      { _id: req.user },
+      {
+        bank_account_detail: {
+          account_type: req.body.account_type,
+          account_holder_name: req.body.account_holder_name,
+          account_number: req.body.account_number,
+          ifsc_code: req.body.ifsc_code,
+        },
+      }
+    );
+    return res.status(200).send({
+      status: true,
+      data,
+      message: "Bank detail updated successfully",
+    });
+  } catch (err) {
+    return res.status(500).send({
+      status: false,
+      data: { errorMessage: err.message },
+      message: "server error",
+    });
+  }
+};
+
+exports.update_user_detail = async (req, res) => {
+  try {
+    const data = await cabdriverModel.findOneAndUpdate(
+      { _id: req.user },
+      {
+        fullName: req.body.fullName,
+        email: req.body.email,
+        mobileNumber: req.body.mobileNumber,
+        pincode: req.body.pincode,
+      }
+    );
+    return res
+      .status(200)
+      .send({
+        status: true,
+        data,
+        message: "User detail updated successfully",
+      });
   } catch (err) {
     return res.status(500).send({
       status: false,

@@ -4,6 +4,7 @@ const cabdriverSchema = new mongoose.Schema(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
+    fullName:{type:String},
     email: { type: String },
     dob: { type: Date },
     mobileNumber: { type: String, required: true, unique: true },
@@ -28,7 +29,10 @@ const cabdriverSchema = new mongoose.Schema(
         type:Number
     },
     pane_card_number:{
-        type:String
+        type:String,
+    },
+    driving_license:{
+        type:String,
     },
     driving_experience:{
         total_experience:{
