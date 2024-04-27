@@ -95,12 +95,11 @@ exports.send_otp_to_aadhaar = async (req, res) => {
         },
       }
     );
-    console.log(response.data)
     const data = response.data;
     res.status(200).send({
-      status: response.data.data.valid_aadhaar ? true : false,
+      status: response.data?.data?.valid_aadhaar ? true : false,
       data,
-      message: response.data.data.valid_aadhaar
+      message: response?.data?.data?.valid_aadhaar
         ? "OTP send successfully"
         : "Invalid aadhaar number",
     });
@@ -130,7 +129,7 @@ exports.verify_aadhaar = async (req, res) => {
       }
     );
     const data = response.data;
-    if (data.status === "success") {
+    if (response?.data?.data !==null && response?.data?.status === "success") {
       await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         { aadhaar_number: Number(req.body.aadhaar_number) }
@@ -141,7 +140,7 @@ exports.verify_aadhaar = async (req, res) => {
     } else {
       res
         .status(400)
-        .json({ status: false, data, message: "Verification failed" });
+        .json({ status: false, data:{}, message: response.data.message });
     }
   } catch (err) {
     return res.status(500).send({
