@@ -119,7 +119,7 @@ exports.verify_aadhaar = async (req, res) => {
     const { client_id } = req.body;
     const response = await axios.post(
       "https://api.idcentral.io/idc/v2/aadhaar/okyc/submit-otp",
-      { otp, client_id }, // Include client_id in the request body
+      { otp:Number(otp), client_id }, // Include client_id in the request body
       {
         headers: {
           accept: "application/json",
@@ -132,7 +132,7 @@ exports.verify_aadhaar = async (req, res) => {
     if (data.status === "success") {
       await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
-        { aadhaar_number: req.body.aadhaar_number }
+        { aadhaar_number: Number(req.body.aadhaar_number) }
       );
       res
         .status(200)
@@ -283,13 +283,11 @@ exports.update_user_detail = async (req, res) => {
         pincode: req.body.pincode,
       }
     );
-    return res
-      .status(200)
-      .send({
-        status: true,
-        data,
-        message: "User detail updated successfully",
-      });
+    return res.status(200).send({
+      status: true,
+      data,
+      message: "User detail updated successfully",
+    });
   } catch (err) {
     return res.status(500).send({
       status: false,
