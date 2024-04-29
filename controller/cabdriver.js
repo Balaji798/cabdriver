@@ -209,15 +209,6 @@ exports.validate_pan = async (req, res) => {
 
 exports.validate_driving_license = async (req, res) => {
   try {
-    if (
-      !/^(([A-Z]{2}[0-9]{2})( )|([A-Z]{2}-[0-9]{2}))((19|20)[0-9][0-9])[0-9]{7}$/.test(
-        req.body.license_Number
-      )
-    ) {
-      return res
-        .status(200)
-        .send({ status: false, data: {}, message: "Invalid driving license" });
-    }
     const { license_number, dob } = req.body;
     const response = await axios.post(
       "https://api.idcentral.io/idc/driving-license",
@@ -233,14 +224,27 @@ exports.validate_driving_license = async (req, res) => {
         },
       }
     );
-    const data = await cabdriverModel.findOneAndUpdate(
-      { _id: req.user },
-      { driving_license: req.body.req.body.license_Number }
-    );
-    return res
+    if(response.data.response_code===1){
+      const data = await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        { driving_license: req.body.license_Number }
+      );
+      return res
+        .status(200)
+        .send({ status:response.data.response_code===1? true:false, data: response.data, message: response.data.message });
+    }else{
+      return res
       .status(200)
-      .send({ status: true, data: response.data, message: "Pan Card updated" });
-  } catch (err) {}
+      .send({ status:false, data: {}, message: response.data.message });
+    }
+
+  } catch (err) {
+    return res.status(500).send({
+      status: false,
+      data: { errorMessage: err.message },
+      message: "server error",
+    });
+  }
 };
 exports.add_bank_detail = async (req, res) => {
   try {
@@ -281,7 +285,7 @@ exports.add_bank_detail = async (req, res) => {
 
 exports.update_user_detail = async (req, res) => {
   try {
-    if ((req.body.limitations && req.body.total_work_hour)) {
+    if (req.body.limitations && req.body.total_work_hour) {
       const data = await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         {
@@ -310,7 +314,7 @@ exports.update_user_detail = async (req, res) => {
         message: "User detail updated successfully",
       });
     }
-    if(req.body.tracking_monitoring){
+    if (req.body.tracking_monitoring) {
       const data = await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         {
@@ -330,7 +334,7 @@ exports.update_user_detail = async (req, res) => {
       req.body.email &&
       req.body.mobileNumber &&
       req.body.pincode &&
-      req.body.dob && 
+      req.body.dob &&
       req.body.vehicle_type
     ) {
       const data = await cabdriverModel.findOneAndUpdate(
@@ -376,7 +380,12 @@ exports.update_user_detail = async (req, res) => {
         message: "User detail updated successfully",
       });
     }
-    if (req.body.fullName && req.body.email && req.body.mobileNumber && req.body.pincode) {
+    if (
+      req.body.fullName &&
+      req.body.email &&
+      req.body.mobileNumber &&
+      req.body.pincode
+    ) {
       const data = await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         {
@@ -392,7 +401,9 @@ exports.update_user_detail = async (req, res) => {
         message: "User detail updated successfully",
       });
     }
-    return res.status(200).send({status:false,data:{},message:"No data updated"})
+    return res
+      .status(200)
+      .send({ status: false, data: {}, message: "No data updated" });
   } catch (err) {
     return res.status(500).send({
       status: false,
