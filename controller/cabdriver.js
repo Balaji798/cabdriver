@@ -1,10 +1,11 @@
 const axios = require("axios");
 const cabdriverModel = require("../model/cabdriver");
+const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 
 exports.user_signup = async (req, res) => {
   try {
-    const { firstName, email, lastName, mobileNumber } = await req.body;
+    const { firstName, email, lastName, mobileNumber,password } = await req.body;
     const reqUser = await cabdriverModel.findOne({
       mobileNumber: mobileNumber,
     });
@@ -22,11 +23,13 @@ exports.user_signup = async (req, res) => {
         .status(200)
         .send({ status: false, data: {}, message: "User already exists" });
     }
+    const hashedPassword = bcrypt.hashSync(password, 5);
     const user = await cabdriverModel.create({
       firstName,
       lastName,
       email,
       mobileNumber,
+      password:hashedPassword
     });
     const payload = {
       userId: user._id,
@@ -59,6 +62,14 @@ exports.user_login = async (req, res) => {
       return res
         .status(200)
         .send({ status: false, data: {}, message: "user dose not exist" });
+    }
+    const isPasswordValid = bcrypt.compareSync(req.body.password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).send({
+        status: false,
+        data:{},
+        message: "Invalid password",
+      });
     }
     if (user) {
       const payload = {
@@ -239,6 +250,7 @@ exports.validate_driving_license = async (req, res) => {
     }
 
   } catch (err) {
+    console.log(err.message)
     return res.status(500).send({
       status: false,
       data: { errorMessage: err.message },
