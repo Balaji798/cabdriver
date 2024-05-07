@@ -1,11 +1,13 @@
 const axios = require("axios");
 const cabdriverModel = require("../model/cabdriver");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { sendOTP } = require("otpless-node-js-auth-sdk");
 
 exports.user_signup = async (req, res) => {
   try {
-    const { firstName, email, lastName, mobileNumber,password } = await req.body;
+    const { firstName, email, lastName, mobileNumber, password } =
+      await req.body;
     const reqUser = await cabdriverModel.findOne({
       mobileNumber: mobileNumber,
     });
@@ -23,23 +25,40 @@ exports.user_signup = async (req, res) => {
         .status(200)
         .send({ status: false, data: {}, message: "User already exists" });
     }
-    const hashedPassword = bcrypt.hashSync(password, 5);
+    //const hashedPassword = bcrypt.hashSync(password, 5);
     const user = await cabdriverModel.create({
       firstName,
       lastName,
       email,
       mobileNumber,
-      password:hashedPassword
+      //password:hashedPassword
     });
-    const payload = {
-      userId: user._id,
-      mobileNumber: req.body.mobileNumber,
-    };
+    // const payload = {
+    //   userId: user._id,
+    //   mobileNumber: req.body.mobileNumber,
+    // };
 
-    const generatedToken = jwt.sign(payload, process.env.JWT_KEY);
+    // const generatedToken = jwt.sign(payload, process.env.JWT_KEY);
+    const response = await axios.post(
+      "https://auth.otpless.app/auth/otp/v1/send",
+      {
+        phoneNumber: mobileNumber,
+        otpLength: 6,
+        channel: "SMS",
+        expiry: 60,
+      },
+      {
+        headers: {
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(response);
     return res.status(200).send({
       status: true,
-      data: { token: generatedToken, user: user },
+      data: response.data,
       message: "Signup Successfully",
     });
   } catch (err) {
@@ -51,7 +70,83 @@ exports.user_signup = async (req, res) => {
     });
   }
 };
+exports.resend_otp = async (req,res)=>{
+  try{
+    const response = await axios.post(
+      "https://auth.otpless.app/auth/otp/v1/send",
+      {
+        orderId:req.body.mobileNumber
+      },
+      {
+        headers: {
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(response);
+    return res.status(200).send({
+      status: true,
+      data: response.data,
+      message: "Signup Successfully",
+    });
+  }catch(err){
+    return res.status(500).send({
+      status: false,
+      data: { errorMessage: err.message },
+      message: "server error",
+    });
+  }
+}
+exports.verify_otp = async (req, res) => {
+  try {
+    const response = await axios.post(
+      "https://auth.otpless.app/auth/otp/v1/verify",
+      {
+        orderId: req.body.orderId,
+        otp: req.body.otp,
+        phoneNumber: req.body.mobileNumber,
+      },
+      {
+        headers: {
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (response.data.isOTPVerified) {
+      const user = await cabdriverModel.findOne({
+        mobileNumber: req.body.mobileNumber,
+      });
+      if (user) {
+        const payload = {
+          userId: user._id,
+          mobileNumber: req.body.mobileNumber,
+        };
 
+        const generatedToken = jwt.sign(payload, process.env.JWT_KEY);
+        return res.status(200).send({
+          status: true,
+          data: { token: generatedToken, user: user },
+          message: "OTP verified",
+        });
+      }
+    }
+    return res.status(200).send({
+      status: true,
+      data: response.data,
+      message: "Signup Successfully",
+    });
+  } catch (err) {
+    return res.status(500).send({
+      status: false,
+      data: { errorMessage: err.message },
+      message: "server error",
+    });
+  }
+};
 exports.user_login = async (req, res) => {
   try {
     const user = await cabdriverModel.findOne({
@@ -63,27 +158,28 @@ exports.user_login = async (req, res) => {
         .status(200)
         .send({ status: false, data: {}, message: "user dose not exist" });
     }
-    const isPasswordValid = bcrypt.compareSync(req.body.password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).send({
-        status: false,
-        data:{},
-        message: "Invalid password",
-      });
-    }
-    if (user) {
-      const payload = {
-        userId: user._id,
-        mobileNumber: req.body.mobileNumber,
-      };
-
-      const generatedToken = jwt.sign(payload, process.env.JWT_KEY);
-      return res.status(200).send({
-        status: true,
-        data: { token: generatedToken, user: user },
-        message: "User Login Successfully",
-      });
-    }
+    const response = await axios.post(
+      "https://auth.otpless.app/auth/otp/v1/send",
+      {
+        phoneNumber: req.body.mobileNumber,
+        otpLength: 6,
+        channel: "SMS",
+        expiry: 60,
+      },
+      {
+        headers: {
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(response);
+    return res.status(200).send({
+      status: true,
+      data: response.data,
+      message: "Signup Successfully",
+    });
   } catch (err) {
     return res.status(500).send({
       status: false,
@@ -235,22 +331,23 @@ exports.validate_driving_license = async (req, res) => {
         },
       }
     );
-    if(response.data.response_code===1){
+    if (response.data.response_code === 1) {
       const data = await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         { driving_license: req.body.license_Number }
       );
+      return res.status(200).send({
+        status: response.data.response_code === 1 ? true : false,
+        data: response.data,
+        message: response.data.message,
+      });
+    } else {
       return res
         .status(200)
-        .send({ status:response.data.response_code===1? true:false, data: response.data, message: response.data.message });
-    }else{
-      return res
-      .status(200)
-      .send({ status:false, data: {}, message: response.data.message });
+        .send({ status: false, data: {}, message: response.data.message });
     }
-
   } catch (err) {
-    console.log(err.message)
+    console.log(err.message);
     return res.status(500).send({
       status: false,
       data: { errorMessage: err.message },

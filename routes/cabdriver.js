@@ -5,6 +5,8 @@ const cabdriverController = require("../controller/cabdriver");
 const middleware = require("../middleware/authenticateUser")
 
 router.post("/signup", cabdriverController.user_signup);
+router.post("/verify_otp",cabdriverController.verify_otp);
+router.post("/resend_otp",cabdriverController.resend_otp)
 router.post("/login",cabdriverController.user_login)
 router.post("/send_otp_aadhaar",middleware.authenticateToken, cabdriverController.send_otp_to_aadhaar);
 router.post("/verify_aadhaar_otp",middleware.authenticateToken, cabdriverController.verify_aadhaar)
