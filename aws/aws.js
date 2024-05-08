@@ -50,4 +50,4 @@ const deleteFile = (fileName) => {
   });
 };
 
-module.exports = { uploadToS3, uploadFile, deleteFile };
+module.exports = { uploadToS3, deleteFile };
