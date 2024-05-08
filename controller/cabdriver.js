@@ -65,7 +65,7 @@ exports.user_signup = async (req, res) => {
 exports.resend_otp = async (req,res)=>{
   try{
     const response = await axios.post(
-      "https://auth.otpless.app/auth/otp/v1/send",
+      "https://auth.otpless.app/auth/otp/v1/resend",
       {
         orderId:req.body.orderId
       },
@@ -81,9 +81,10 @@ exports.resend_otp = async (req,res)=>{
     return res.status(200).send({
       status: true,
       data: response.data,
-      message: "Signup Successfully",
+      message: "OTP send Successfully",
     });
   }catch(err){
+    console.log(err)
     return res.status(500).send({
       status: false,
       data: { errorMessage: err.message },
@@ -156,7 +157,7 @@ exports.user_login = async (req, res) => {
         phoneNumber: req.body.mobileNumber,
         otpLength: 6,
         channel: "SMS",
-        expiry: 60,
+        expiry: 600,
       },
       {
         headers: {
