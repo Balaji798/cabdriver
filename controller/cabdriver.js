@@ -437,13 +437,6 @@ exports.update_user_detail = async (req, res) => {
           vehicle_reg_img: await aws.uploadToS3(req.vehicle_reg_img.buffer),
           insurance_img: await aws.uploadToS3(req.insurance_img.buffer),
           road_tax_img: await aws.uploadToS3(req.road_tax_img.buffer),
-          firstName: req.body.fullName,
-          lastName: req.body.lastName,
-          email: req.body.email,
-          mobileNumber: req.body.mobileNumber,
-          pincode: req.body.pincode,
-          dob: req.body.dob,
-          address: req.body.address,
           driving_experience: {
             total_experience: req.body.total_experience,
             vehicle_type: req.body.vehicle_type,
