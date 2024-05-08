@@ -15,12 +15,12 @@ const S3 = new AWS.S3(awsConfig);
 
 //upload to s3
 const uploadToS3 = (fileData) => {
-  const decodedFileData = Buffer.from(fileData, 'base64')
+  //const decodedFileData = Buffer.from(fileData, 'base64')
   return new Promise((resolve, reject) => {
     const params = {
       Bucket: bucketName,
       Key: `cabdriver/${Date.now().toString()}.jpg`,
-      Body: decodedFileData,
+      Body: fileData,
     };
     S3.upload(params, (err, data) => {
       if (err) {
