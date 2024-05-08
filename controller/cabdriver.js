@@ -6,7 +6,7 @@ const { sendOTP } = require("otpless-node-js-auth-sdk");
 
 exports.user_signup = async (req, res) => {
   try {
-    const { firstName, email, lastName, mobileNumber, password } =
+    const { firstName, email, lastName, mobileNumber } =
       await req.body;
     const reqUser = await cabdriverModel.findOne({
       mobileNumber: mobileNumber,
@@ -25,27 +25,19 @@ exports.user_signup = async (req, res) => {
         .status(200)
         .send({ status: false, data: {}, message: "User already exists" });
     }
-    //const hashedPassword = bcrypt.hashSync(password, 5);
     const user = await cabdriverModel.create({
       firstName,
       lastName,
       email,
       mobileNumber,
-      //password:hashedPassword
     });
-    // const payload = {
-    //   userId: user._id,
-    //   mobileNumber: req.body.mobileNumber,
-    // };
-
-    // const generatedToken = jwt.sign(payload, process.env.JWT_KEY);
     const response = await axios.post(
       "https://auth.otpless.app/auth/otp/v1/send",
       {
         phoneNumber: mobileNumber,
         otpLength: 6,
         channel: "SMS",
-        expiry: 60,
+        expiry: 600,
       },
       {
         headers: {
@@ -75,7 +67,7 @@ exports.resend_otp = async (req,res)=>{
     const response = await axios.post(
       "https://auth.otpless.app/auth/otp/v1/send",
       {
-        orderId:req.body.mobileNumber
+        orderId:req.body.orderId
       },
       {
         headers: {
@@ -135,9 +127,9 @@ exports.verify_otp = async (req, res) => {
       }
     }
     return res.status(200).send({
-      status: true,
+      status: false,
       data: response.data,
-      message: "Signup Successfully",
+      message: response.data.reason,
     });
   } catch (err) {
     return res.status(500).send({
@@ -174,7 +166,6 @@ exports.user_login = async (req, res) => {
         },
       }
     );
-    console.log(response);
     return res.status(200).send({
       status: true,
       data: response.data,
