@@ -1,7 +1,7 @@
 const axios = require("axios");
 const cabdriverModel = require("../model/cabdriver");
 const jwt = require("jsonwebtoken");
-const aws = require("../aws");
+const aws = require("../aws/aws");
 
 exports.user_signup = async (req, res) => {
   try {
