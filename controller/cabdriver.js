@@ -1,13 +1,11 @@
 const axios = require("axios");
 const cabdriverModel = require("../model/cabdriver");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { sendOTP } = require("otpless-node-js-auth-sdk");
+const aws = require("../aws");
 
 exports.user_signup = async (req, res) => {
   try {
-    const { firstName, email, lastName, mobileNumber } =
-      await req.body;
+    const { firstName, email, lastName, mobileNumber } = await req.body;
     const reqUser = await cabdriverModel.findOne({
       mobileNumber: mobileNumber,
     });
@@ -62,12 +60,12 @@ exports.user_signup = async (req, res) => {
     });
   }
 };
-exports.resend_otp = async (req,res)=>{
-  try{
+exports.resend_otp = async (req, res) => {
+  try {
     const response = await axios.post(
       "https://auth.otpless.app/auth/otp/v1/resend",
       {
-        orderId:req.body.orderId
+        orderId: req.body.orderId,
       },
       {
         headers: {
@@ -83,15 +81,15 @@ exports.resend_otp = async (req,res)=>{
       data: response.data,
       message: "OTP send Successfully",
     });
-  }catch(err){
-    console.log(err)
+  } catch (err) {
+    console.log(err);
     return res.status(500).send({
       status: false,
       data: { errorMessage: err.message },
       message: "server error",
     });
   }
-}
+};
 exports.verify_otp = async (req, res) => {
   try {
     const response = await axios.post(
@@ -441,6 +439,10 @@ exports.update_user_detail = async (req, res) => {
       const data = await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         {
+          dl_img: await aws.uploadToS3(req.dl_img.buffer),
+          vehicle_reg_img: await aws.uploadToS3(req.vehicle_reg_img.buffer),
+          insurance_img: await aws.uploadToS3(req.insurance_img.buffer),
+          road_tax_img: await aws.uploadToS3(req.road_tax_img.buffer),
           firstName: req.body.fullName,
           lastName: req.body.lastName,
           email: req.body.email,
@@ -505,6 +507,18 @@ exports.update_user_detail = async (req, res) => {
     return res
       .status(200)
       .send({ status: true, data: {}, message: "No data updated" });
+  } catch (err) {
+    return res.status(500).send({
+      status: false,
+      data: { errorMessage: err.message },
+      message: "server error",
+    });
+  }
+};
+
+exports.document_upload = async (req, res) => {
+  try {
+    return await aws.uploadToS3(file.buffer);
   } catch (err) {
     return res.status(500).send({
       status: false,
