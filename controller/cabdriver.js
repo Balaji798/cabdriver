@@ -434,10 +434,10 @@ exports.update_user_detail = async (req, res) => {
       const data = await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         {
-          dl_img: await aws.uploadToS3(req.dl_img.buffer),
-          vehicle_reg_img: await aws.uploadToS3(req.vehicle_reg_img.buffer),
-          insurance_img: await aws.uploadToS3(req.insurance_img.buffer),
-          road_tax_img: await aws.uploadToS3(req.road_tax_img.buffer),
+          dl_img: await aws.uploadToS3(req.body.dl_img.buffer),
+          vehicle_reg_img: await aws.uploadToS3(req.body.vehicle_reg_img.buffer),
+          insurance_img: await aws.uploadToS3(req.body.insurance_img.buffer),
+          road_tax_img: await aws.uploadToS3(req.body.road_tax_img.buffer),
           driving_experience: {
             total_experience: req.body.total_experience,
             vehicle_type: req.body.vehicle_type,
