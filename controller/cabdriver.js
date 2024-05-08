@@ -430,6 +430,7 @@ exports.update_user_detail = async (req, res) => {
       req.body.total_experience &&
       req.body.vehicle_type
     ) {
+      console.log(req.body)
       const data = await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         {
