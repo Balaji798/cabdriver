@@ -427,13 +427,7 @@ exports.update_user_detail = async (req, res) => {
       });
     }
     if (
-      req.body.firstName &&
-      req.body.lastName &&
       req.body.total_experience &&
-      req.body.email &&
-      req.body.mobileNumber &&
-      req.body.pincode &&
-      req.body.dob &&
       req.body.vehicle_type
     ) {
       const data = await cabdriverModel.findOneAndUpdate(
