@@ -435,9 +435,9 @@ exports.update_user_detail = async (req, res) => {
         { _id: req.user },
         {
           dl_img: await aws.uploadToS3(req.body.dl_img),
-          // vehicle_reg_img: await aws.uploadToS3(req.body.vehicle_reg_img),
-          // insurance_img: await aws.uploadToS3(req.body.insurance_img),
-          // road_tax_img: await aws.uploadToS3(req.body.road_tax_img),
+          vehicle_reg_img: await aws.uploadToS3(req.body.vehicle_reg_img),
+          insurance_img: await aws.uploadToS3(req.body.insurance_img),
+          road_tax_img: await aws.uploadToS3(req.body.road_tax_img),
           driving_experience: {
             total_experience: req.body.total_experience,
             vehicle_type: req.body.vehicle_type,
