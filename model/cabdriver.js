@@ -37,6 +37,9 @@ const cabdriverSchema = new mongoose.Schema(
     driving_license: {
       type: String,
     },
+    rc_number:{
+      type:String
+    },
     driving_experience: {
       total_experience: {
         type: String,

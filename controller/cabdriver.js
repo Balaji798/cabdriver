@@ -345,6 +345,44 @@ exports.validate_driving_license = async (req, res) => {
     });
   }
 };
+exports.validate_rc = async (req,res)=>{
+  try{
+    const response = await axios.post(
+      "https://api.idcentral.io/idc/v2/rc/verify",
+      {
+        rc_number: req.body.rc_number
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "api-key": process.env.AADHAAR_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (response.data.response_code === 1) {
+      await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        { rc_number: req.body.rc_number }
+      );
+      return res.status(200).send({
+        status: response.data.response_code === 1 ? true : false,
+        data: response.data,
+        message: response.data.message,
+      });
+    } else {
+      return res
+        .status(200)
+        .send({ status: false, data: {}, message: response.data.message });
+    }
+  }catch(err){
+    return res.status(500).send({
+      status: false,
+      data: { errorMessage: err.message },
+      message: "server error",
+    });
+  }
+}
 exports.add_bank_detail = async (req, res) => {
   try {
     if (!/^\d{9,18}$/.test(req.body.account_number)) {
@@ -434,10 +472,10 @@ exports.update_user_detail = async (req, res) => {
       const data = await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         {
-          dl_img: await aws.uploadToS3(req.body.dl_img),
-          vehicle_reg_img: await aws.uploadToS3(req.body.vehicle_reg_img),
-          insurance_img: await aws.uploadToS3(req.body.insurance_img),
-          road_tax_img: await aws.uploadToS3(req.body.road_tax_img),
+          // dl_img: await aws.uploadToS3(req.body.dl_img),
+          // vehicle_reg_img: await aws.uploadToS3(req.body.vehicle_reg_img),
+          // insurance_img: await aws.uploadToS3(req.body.insurance_img),
+          // road_tax_img: await aws.uploadToS3(req.body.road_tax_img),
           driving_experience: {
             total_experience: req.body.total_experience,
             vehicle_type: req.body.vehicle_type,

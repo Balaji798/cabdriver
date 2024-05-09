@@ -12,6 +12,7 @@ router.post("/send_otp_aadhaar",middleware.authenticateToken, cabdriverControlle
 router.post("/verify_aadhaar_otp",middleware.authenticateToken, cabdriverController.verify_aadhaar)
 router.post("/validate_pan",middleware.authenticateToken,cabdriverController.validate_pan);
 router.post("/validate_driving_license",middleware.authenticateToken, cabdriverController.validate_driving_license);
+router.post("/validate_rc",middleware.authenticateToken, cabdriverController.validate_rc)
 router.post("/add_bank_detail", middleware.authenticateToken, cabdriverController.add_bank_detail);
 router.post("/update_user_detail",middleware.authenticateToken, cabdriverController.update_user_detail)
 
