@@ -4,8 +4,8 @@
   "description": "Onbording for cab driver on yes go bus",
   "main": "index.js",
   "scripts": {
-    "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "start": "nodemon --es-module-specifier-resolution=node app.js",
+    "build": "npm install"
   },
   "author": "balaji yadav",
   "license": "ISC",
