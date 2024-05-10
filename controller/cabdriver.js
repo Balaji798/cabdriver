@@ -420,46 +420,6 @@ exports.add_bank_detail = async (req, res) => {
   }
 };
 
-exports.upload_file = async (req,res)=>{
-  try{
-    const keyName = Object.keys(req.body)[0];
-    console.log(keyName)
-  //   function guessMimeTypeFromBase64(base64Data) {
-  //     // Convert base64 to buffer
-  //     const buffer = Buffer.from(base64Data, 'base64');
-  
-  //     // Check for common file signatures
-  //     if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
-  //         return 'image/jpeg';
-  //     } else if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
-  //         return 'image/png';
-  //     } else if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38) {
-  //         return 'image/gif';
-  //     }
-      
-  //     // If none of the common signatures match, return a default MIME type
-  //     return 'application/octet-stream';
-  // }
-  
-  // const mimeType = guessMimeTypeFromBase64(req.body[keyName]);
-  // console.log(mimeType,typeof req.body[keyName])
-    // const url =await aws.uploadToS3(req.body[keyName])
-    // await cabdriverModel.findOneAndUpdate({_id:req.user},{
-    //   [keyName]:url
-    // })
-    return res.status(200).send({
-      status:true,
-      data:{keyName},
-      message:"File uploaded successfully"
-    })
-  }catch(err){
-    return res.status(500).send({
-      status: false,
-      data: { errorMessage: err.message },
-      message: "server error",
-    });
-  }
-}
 exports.update_user_detail = async (req, res) => {
   try {
     if (req.body.limitations && req.body.total_work_hour) {
@@ -512,6 +472,10 @@ exports.update_user_detail = async (req, res) => {
       const data = await cabdriverModel.findOneAndUpdate(
         { _id: req.user },
         {
+          dl_img: await aws.uploadToS3(req.body.dl_img),
+          vehicle_reg_img: await aws.uploadToS3(req.body.vehicle_reg_img),
+          insurance_img: await aws.uploadToS3(req.body.insurance_img),
+          road_tax_img: await aws.uploadToS3(req.body.road_tax_img),
           driving_experience: {
             total_experience: req.body.total_experience,
             vehicle_type: req.body.vehicle_type,
