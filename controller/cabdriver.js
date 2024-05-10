@@ -441,7 +441,7 @@ exports.upload_file = async (req,res)=>{
   }
   
   const mimeType = guessMimeTypeFromBase64(req.body[keyName]);
-  console.log(mimeType)
+  console.log(mimeType,typeof req.body[keyName])
     // const url =await aws.uploadToS3(req.body[keyName])
     // await cabdriverModel.findOneAndUpdate({_id:req.user},{
     //   [keyName]:url
