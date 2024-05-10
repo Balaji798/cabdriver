@@ -423,32 +423,33 @@ exports.add_bank_detail = async (req, res) => {
 exports.upload_file = async (req,res)=>{
   try{
     const keyName = Object.keys(req.body)[0];
-    function guessMimeTypeFromBase64(base64Data) {
-      // Convert base64 to buffer
-      const buffer = Buffer.from(base64Data, 'base64');
+    console.log(keyName)
+  //   function guessMimeTypeFromBase64(base64Data) {
+  //     // Convert base64 to buffer
+  //     const buffer = Buffer.from(base64Data, 'base64');
   
-      // Check for common file signatures
-      if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
-          return 'image/jpeg';
-      } else if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
-          return 'image/png';
-      } else if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38) {
-          return 'image/gif';
-      }
+  //     // Check for common file signatures
+  //     if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
+  //         return 'image/jpeg';
+  //     } else if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+  //         return 'image/png';
+  //     } else if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38) {
+  //         return 'image/gif';
+  //     }
       
-      // If none of the common signatures match, return a default MIME type
-      return 'application/octet-stream';
-  }
+  //     // If none of the common signatures match, return a default MIME type
+  //     return 'application/octet-stream';
+  // }
   
-  const mimeType = guessMimeTypeFromBase64(req.body[keyName]);
-  console.log(mimeType,typeof req.body[keyName])
+  // const mimeType = guessMimeTypeFromBase64(req.body[keyName]);
+  // console.log(mimeType,typeof req.body[keyName])
     // const url =await aws.uploadToS3(req.body[keyName])
     // await cabdriverModel.findOneAndUpdate({_id:req.user},{
     //   [keyName]:url
     // })
     return res.status(200).send({
       status:true,
-      data:{mimeType},
+      data:{keyName},
       message:"File uploaded successfully"
     })
   }catch(err){
