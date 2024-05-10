@@ -395,22 +395,43 @@ exports.add_bank_detail = async (req, res) => {
         .status(200)
         .send({ status: false, data: {}, message: "Invalid IFSC number" });
     }
-    const data = await cabdriverModel.findOneAndUpdate(
-      { _id: req.user },
+    const response = await axios.post(
+      "https://api.idcentral.io/idc/v2/bank/verify-bank",
       {
-        bank_account_detail: {
-          account_type: req.body.account_type,
-          account_holder_name: req.body.account_holder_name,
-          account_number: req.body.account_number,
-          ifsc_code: req.body.ifsc_code,
+        account_number: req.body.account_number,
+        ifsc: req.body.ifsc_code,
+        extended_data: true
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "api-key": process.env.AADHAAR_API_KEY,
+          "Content-Type": "application/json",
         },
       }
     );
-    return res.status(200).send({
-      status: true,
-      data,
-      message: "Bank detail updated successfully",
-    });
+    if (response.data.response_code === 1){
+      const data = await cabdriverModel.findOneAndUpdate(
+        { _id: req.user },
+        {
+          bank_account_detail: {
+            account_type: req.body.account_type,
+            account_holder_name: req.body.account_holder_name,
+            account_number: req.body.account_number,
+            ifsc_code: req.body.ifsc_code,
+          },
+        }
+      );
+      return res.status(200).send({
+        status: true,
+        data,
+        message: "Bank detail updated successfully",
+      });
+    }else {
+      return res
+        .status(200)
+        .send({ status: false, data: {}, message: response.data.message });
+    }
   } catch (err) {
     return res.status(500).send({
       status: false,
