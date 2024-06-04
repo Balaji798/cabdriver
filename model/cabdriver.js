@@ -10,8 +10,8 @@ const cabdriverSchema = new Schema(
     mobileNumber: { type: String, required: true, unique: true },
     address: { type: String },
     pincode: { type: String },
-    alternateNumber: {type:String},
-    bloodGroup: {type:String},
+    alternateNumber: { type: String },
+    bloodGroup: { type: String },
     bank_account_detail: {
       account_type: {
         type: String,
@@ -36,22 +36,22 @@ const cabdriverSchema = new Schema(
     driving_license: {
       type: String,
     },
-    rc_number:{
-      type:String
+    rc_number: {
+      type: String,
     },
-    driving_experience: {
-      total_experience: {
-        type: String,
-      },
-      vehicle_type: {
-        type: String,
-      },
+    //driving_experience: {
+    total_experience: {
+      type: String,
     },
-    vehicle_model:{type:String},
-    vehicle_category: {type:String},
-    vehicle_number:{type:String},
-    year_of_registration: {type:String},
-  
+    // vehicle_type: {
+    //   type: String,
+    // },
+    //},
+    vehicle_model: { type: String },
+    vehicle_category: { type: String },
+    vehicle_number: { type: String },
+    year_of_registration: { type: String },
+
     // vehicle: {
     //   vehicle_registration: {
     //     type: String,
@@ -77,11 +77,11 @@ const cabdriverSchema = new Schema(
     // tracking_monitoring: {
     //   type: String,
     // },
-    dl_img: {type:String},
-    vehicle_reg_img: {type:String},
-    vehicle_image: {type:String},
-    profile_img: {type:String},
-    aadhaar_img: {type:String},
+    dl_img: { type: String },
+    vehicle_reg_img: { type: String },
+    vehicle_image: { type: String },
+    profile_img: { type: String },
+    aadhaar_img: { type: String },
   },
   { timestamps: true }
 );
