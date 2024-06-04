@@ -489,20 +489,32 @@ export const update_user_detail = async (req, res) => {
     //insurance_img: await uploadToS3(req.body.insurance_img),
     //road_tax_img: await uploadToS3(req.body.road_tax_img),
     if (
+      !dl_img &&
+      !vehicle_reg_img &&
+      !vehicle_image &&
+      !profile_img &&
+      !aadhaar_img
+    ) {
+      return res.status(400).send({
+        status: false,
+        data: {},
+        message: "All document required",
+      });
+    }
+    if (
       req.body.total_experience &&
-      req.body.vehicle_type &&
-      vehicle_model &&
-      vehicle_category &&
-      vehicle_number &&
-      year_of_registration &&
-      fullName &&
-      email &&
-      mobileNumber &&
-      alternateNumber &&
-      bloodGroup &&
-      pincode &&
-      address &&
-      dob
+      req.body.vehicle_model &&
+      req.body.vehicle_category &&
+      req.body.vehicle_number &&
+      req.body.year_of_registration &&
+      req.body.fullName &&
+      req.body.email &&
+      req.body.mobileNumber &&
+      req.body.alternateNumber &&
+      req.body.bloodGroup &&
+      req.body.pincode &&
+      req.body.address &&
+      req.body.dob
     ) {
       console.log(req.body);
       const data = await findOneAndUpdate(
@@ -513,11 +525,7 @@ export const update_user_detail = async (req, res) => {
           vehicle_image: await uploadToS3(req.body.vehicle_image),
           profile_img: await uploadToS3(req.body.profile_img),
           aadhaar_img: await uploadToS3(req.body.aadhaar_img),
-
-          driving_experience: {
-            total_experience: req.body.total_experience,
-            vehicle_type: req.body.vehicle_type,
-          },
+          total_experience: req.body.total_experience,
           vehicle_model: req.body.vehicle_model,
           vehicle_category: req.body.vehicle_category,
           vehicle_number: req.body.vehicle_number,
